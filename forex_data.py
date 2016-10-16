@@ -96,6 +96,9 @@ class currency:
             
             # save if file is does not exists
             if save:
+                # create directory if not existis
+                if not os.path.exists('general_database'):
+                    os.makedirs('general_database')
                 # save the data
                 data.to_csv(dr + '\\' + self.file_name(warning = False))
                 # confirmation message
