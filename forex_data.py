@@ -243,7 +243,66 @@ class currency:
         plt.show()
         
         return td
+        
+        
+    def montecarlo_simul(self, periods = 20, tr_y = 25, col = 'Adj_close', non_parametric = False):
+        '''
+        
+        '''
+        # Mean and variance of the returns
+        mu, sigma = self.returns[col].mean(), self.returns[col].std()
+        
+        # Function that calculates the future value of P given r
+        F = lambda P, r: P*(1 + r)
+        
+        # Function to generate random numbers
+        def rt_rand(mu, sigma, n, non_parametric = False):
+            if not non_parametric:
+                rs = np.random.normal(mu, sigma, 1)
+            else:
+                rs = 0 # kernel distribution
+            return rs
+        
+        # Function to calculate a trayectory with motecarlo simulation
+        seed_def = self.prices[col][-1]
+        def montecarlo_tray(t, seed = seed_def, mu = mu, sigma = sigma):
+            tr = np.array([seed])
+            for i in np.arange(1,t):
+                tr = np.append(tr, F(tr[i-1], rt_rand(mu, sigma, 1)))
+            return tr
+        
+        # Number of periods 
+        ft = periods
+        
+        # Number of trayectories 
+        n_tr = tr_y
+        
+        
+        m = [montecarlo_tray(ft+1) for i in np.arange(n_tr)]
+        mean_value = np.array(np.mean(np.asmatrix(m), 0))[0]
 
+        x = np.arange(len(self.prices.Adj_close.values))
+        x = x - len(self.prices.Adj_close.values) + 1
+        
+        ymin = np.min([np.min(self.prices.Adj_close.values[-100:]), np.min(m)]) - 1 
+        ymax = np.max([np.max(self.prices.Adj_close.values[-100:]), np.max(m)]) + 1 
+        
+        plt.figure(figsize=(8, 6))
+        plt.plot(x,self.prices.Adj_close.values)
+        plt.axvline(x=0, alpha = 0.5, ls = '--')
+        for i in m:
+            plt.plot(i, '-b', alpha = 0.3)
+        plt.plot(mean_value, '-r', linewidth = 1)
+        plt.xlim([-100,ft])
+        plt.ylim([ymin, ymax])
+        plt.title('Exchange rate: {}'.format(self.name()))
+        plt.ylabel('Value in {}'.format(self.units))
+        plt.xlabel('Period')
+        plt.show()
+        
+        str_res = 'The expected value of the exchange rate in {} periods is: {}'
+        print(str_res.format(ft, mean_value[-1]))
+        return mean_value[-1]
 
 """
 '''
