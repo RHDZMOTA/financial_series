@@ -11,6 +11,7 @@ script to download financial data...
 import numpy as np
 import pandas as pd
 import pandas_datareader.data as web
+import matplotlib.pyplot as plt
 #import pandas.io.data as wb
 #import pandas_datareader as pdr
 #from pandas_datareader.oanda import get_oanda_currency_historical_rates as get_oanda
@@ -104,6 +105,8 @@ class currency:
                 # return data
         else:
             data = pd.read_csv(self.file(warning = False), index_col=[0])
+            indx = pd.to_datetime(data.index)
+            data = data.reindex(indx)
         
         # update the prices
         self.prices = data 
@@ -116,7 +119,7 @@ class currency:
         '''
         
         # empty dataframe for returns 
-        idx = self.prices.index[1:-1]
+        idx = self.prices.index[1:]
         rt = pd.DataFrame([], index = idx)
         
         # calculate the returns for each column of the prices df
@@ -128,8 +131,116 @@ class currency:
         if ret:
             return rt
     
+    def fill(self):
+        self.download()
+        self.calc_returns()
     
+    def binary_rend(self, init_t = 0, delta = 0):
+        '''
+        
+        '''
+        # determine initial date
+        if init_t != 0:
+            init_t = dt.datetime.strptime(init_t, '%Y/%m/%d')
+        else:
+            init_t = self.t0 + dt.timedelta(days = 1)
+        
+        # determine delta (days)
+        aux_delt = self.tf - init_t
+        if delta == 0:
+            dys = aux_delt
+        elif type(delta) == type(dt.timedelta(days = 0)):
+            dys = delta
+        else:
+            dys = dt.timedelta(days = delta)
+            
+        df_aux = self.returns.Adj_close.loc[init_t:init_t+dys].map(lambda x: x > 0)
+        return df_aux.values
     
+    def entropy(self, init_t = 0, delta = 0, level = 1):
+        '''
+        desc. This function calculates the binary information entropy. 
+        '''
+        # determine initial date
+        if init_t != 0:
+            init_t = dt.datetime.strptime(init_t, '%Y/%m/%d')
+        else:
+            init_t = self.t0 + dt.timedelta(days = 1)
+        
+        # determine delta (days)
+        aux_delt = self.tf - init_t
+        if delta == 0:
+            dys = aux_delt
+        elif type(delta) == type(dt.timedelta(days = 0)):
+            dys = delta
+        else:
+            dys = dt.timedelta(days = delta)
+        
+        # error conditional 
+        if dys > aux_delt:
+            print('Not enought data... Only {} available.'.format(str(aux_delt)))
+            return 0
+        
+        # auxiliar dataframe and binary string 
+        df_aux = self.returns.Adj_close.loc[init_t:init_t+dys].map(lambda x: x > 0)
+        string_b = ''.join(df_aux.map(int).map(str))
+        
+        # probability of one and zero 
+        p_one  = string_b.count('1') / len(string_b)
+        p_zero = string_b.count('0') / len(string_b)
+        
+        # calculate binary information entropy
+        information_entropy = lambda x: x*np.log2(1/x)
+        h = information_entropy(p_one) + information_entropy(p_zero)
+        
+        return h
+        
+    def mindelt_entropy(self):
+        '''
+        This functions searches for the time interval (delta) in days that 
+        minimize the entropy...
+        '''
+        max_delta = (self.tf - dt.timedelta(days = 1)) - self.t0
+        min_detla = dt.timedelta(days = 16)
+        
+        t_init = self.t0 + dt.timedelta(days = 1)
+        t_end = self.tf
+        
+        # entropy( init_t = 0, delta = 0)
+        rsl = pd.DataFrame(columns = ['Delta', 'Mean', 'Standard_dev', 'Obs'])
+        det = min_detla
+        cond = True 
+        while cond:
+            condit = True
+            t = t_init 
+            etry = np.array([])
+            while condit:
+                etry = np.append(etry, self.entropy(init_t = t.strftime('%Y/%m/%d'), delta = det))
+                t = t + dt.timedelta(days = 1)
+                if t+det == t_end:
+                    condit = False
+            dct = {'Delta':det, 'Mean':np.mean(etry), 'Standard_dev':np.std(etry),
+            'Obs':len(etry)}
+            dct = pd.DataFrame(dct, index = np.array([0]))
+            rsl = rsl.append(dct)
+            det += dt.timedelta(days = 1)
+            if det == max_delta:
+                cond = False
+        
+        rsl.reset_index(inplace = True, drop = True)
+        
+        td = rsl.loc[rsl['Mean'] == min(rsl['Mean'])].Delta
+        td = (td.values[0] / np.timedelta64(1, 'D')).astype(int)
+        
+        plt.figure()
+        plt.plot(rsl['Delta'],rsl['Mean'])
+        plt.title('Mean entropy level per delta')
+        plt.xlabel('Days in delta window')
+        plt.ylabel('Average entropy')
+        plt.show()
+        
+        return td
+
 
 """
 '''

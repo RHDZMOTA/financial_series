@@ -40,8 +40,8 @@ def calc_rtns(prices, warning = True, met_log = True):
     
     # Calculate the returns 
     if met_log:
-        returns = np.log(prices[1:-1] / prices[0:-2])
+        returns = np.log(prices[1:] / prices[0:-1])
     else:
-        returns = prices[1:-1] / prices[0:-2] - 1 
+        returns = prices[1:] / prices[0:-1] - 1 
     
     return returns         
