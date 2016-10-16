@@ -1,11 +1,13 @@
 # forex_analysis
-Foreign Exchange Rate (FOREX) currency analysis. 
+###Foreign Exchange Rate (FOREX) currency analysis. 
 
-by **Rodrigo Hernández Mota**
+By: **Rodrigo Hernández Mota**
 
-_Status: in development._ 
 
-This repository contains "advanced" tools to aid in the analysis of exchange rates. The main advantage is a new datatype (class) named: _currency_. To use this datatype in a script just import forex_data as following:
+_**Status**: in development._ 
+
+
+This repository contains "advanced" tools to aid in the analysis of exchange rates. The main advantage is the creation of a new datatype (class) named: _currency_. To use this datatype in a script just import forex_data as following:
 
 `from forex_data import *`
 
@@ -54,6 +56,6 @@ And more in progres...
 
 ## Requirements
 
-This datatype depends on some basic and commony python 3 libraries: pandas, datetime, os, numpy and matplotlib.pyplot. 
+This datatype depends on some basic and commony python 3 libraries: pandas, datetime, os, numpy and matplotlib.pyplot. And an external script aux_fun.py. 
 
 [continue]
