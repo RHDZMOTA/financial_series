@@ -284,8 +284,11 @@ class currency:
         x = np.arange(len(self.prices.Adj_close.values))
         x = x - len(self.prices.Adj_close.values) + 1
         
-        ymin = np.min([np.min(self.prices.Adj_close.values[-100:]), np.min(m)]) - 1 
-        ymax = np.max([np.max(self.prices.Adj_close.values[-100:]), np.max(m)]) + 1 
+        ymin = np.min([np.min(self.prices.Adj_close.values[-100:]), np.min(m)]) 
+        ymax = np.max([np.max(self.prices.Adj_close.values[-100:]), np.max(m)]) 
+        rg = ymax - ymin
+        ymin = ymin - rg / 10
+        ymax = ymax + rg / 10
         
         plt.figure(figsize=(8, 6))
         plt.plot(x,self.prices.Adj_close.values)
