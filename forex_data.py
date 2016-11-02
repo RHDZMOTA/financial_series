@@ -134,8 +134,8 @@ class currency:
         if ret:
             return rt
     
-    def fill(self):
-        self.download()
+    def fill(self, save = 0):
+        self.download(save = save)
         self.calc_returns()
     
     def binary_rend(self, init_t = 0, delta = 0):
@@ -265,6 +265,7 @@ class currency:
         
         # Function to calculate a trayectory with motecarlo simulation
         seed_def = self.prices[col][-1]
+        
         def montecarlo_tray(t, seed = seed_def, mu = mu, sigma = sigma):
             tr = np.array([seed])
             for i in np.arange(1,t):
@@ -306,6 +307,26 @@ class currency:
         str_res = 'The expected value of the exchange rate in {} periods is: {}'
         print(str_res.format(ft, mean_value[-1]))
         return mean_value[-1]
+        
+    def plot(self, curr_obj = [], variable = 'prices', col = 'Adj_close', labels = True):
+        if type(curr_obj) != type([]):
+            obj = [self] + [curr_obj]
+            string = 'list(map(lambda x: x.{}.{}.plot(label = x.name()), obj))'
+            eval(string.format(variable, col))
+            plt.title('{} : {}'.format(variable,col))
+            if labels:
+                plt.legend(loc='best')
+        elif len(curr_obj) == 0:
+            string = 'self.{}.{}.plot(label = self.name())'
+            eval(string.format(variable, col))
+            plt.title('{} : {} : {}'.format(self.name(),variable,col))
+        else:
+            obj = [self] + curr_obj
+            string = 'list(map(lambda x: x.{}.{}.plot(label = x.name()), obj))'
+            eval(string.format(variable, col))
+            plt.title('{} : {}'.format(variable,col))
+            if labels:
+                plt.legend(loc='best')
 
 """
 '''
