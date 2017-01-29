@@ -4,7 +4,7 @@ Test script...
 @author: Rodrigo
 """
 
-from forex_data import *
+from forex_analysis.forex_data import *
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
