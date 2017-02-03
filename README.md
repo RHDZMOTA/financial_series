@@ -1,4 +1,4 @@
-# forex_analysis
+# financial_series
 ###Foreign Exchange Rate (FOREX) currency analysis. 
 
 By: **Rodrigo Hernández Mota**
@@ -9,7 +9,7 @@ _**Status**: in development._
 
 This repository contains "advanced" tools to aid in the analysis of exchange rates. The main advantage is the creation of a new datatype (class) named: _currency_. To use this datatype in a script just import forex_data as following:
 
-`from forex_data import *`
+`from forex_data import currency`
 
 ## Type Currency
 
@@ -29,7 +29,7 @@ This will generate a directory named 'general_database' with the .csv
 
 Use the following command to show the downloaded prices: 
 ```
-a.prices.head()`
+a.prices.head()
 ```
 
 The financial returns are calculated by default as a logarithmic difference. To see the data type:
