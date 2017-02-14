@@ -71,6 +71,7 @@ class FinancialSeries(object):
         self.t0 = t0
         self.tf = tf
         self.units = units
+        
     def calc_returns(self, ret = 0):
         '''
         
@@ -436,7 +437,7 @@ class Stock(FinancialSeries):
 
 
     # download data
-    def download(self, save = 0, ret = 0):
+    def download(self, save = 0, ret = 0, selenium = False):
         '''
         Description: 
         '''
@@ -450,10 +451,29 @@ class Stock(FinancialSeries):
             yho = self.stock_name
         
             # read data into memory
-            data = web.DataReader(yho, 'yahoo', self.t0, self.tf)
+            if selenium:
+                from selenium import webdriver
+                import platform
+                operative_system = platform.system().lower()
+                driv_r = 'drivers/{}/chromedriver'.format(operative_system) if operative_system != 'windows' else 'drivers/windows/chromedriver.exe'
+                driver = webdriver.Chrome(driv_r)
+                driver.get('https://finance.yahoo.com/quote/{}/history?p={}'.format(yho,yho))
+                table = driver.find_elements_by_xpath('//table[@data-test="historical-prices"]')
+                table = table[0].text
+                driver.close()
+                d = {'Date':[],'Open':[],'High':[],'Low':[],'Close':[],'Adj_close':[],'Volume':[]}
+                for i in table.split('\n')[1:-1]:
+                    temp = i.split(' ')
+                    i = [temp[0]+','+temp[1]+' '+temp[2]]+temp[3:]
+                    for j,k in zip(i,['Date','Open','High','Low','Close','Adj_close','Volume']):
+                        d[k].append(j)
+                data = pd.DataFrame(d)
+            else:   
+                data = web.DataReader(yho, 'yahoo', self.t0, self.tf)
+                data.rename(columns = {'Adj Close':'Adj_close'}, inplace = True)
             self.volume = data['Volume'].copy()
             del data['Volume']
-            data.rename(columns = {'Adj Close':'Adj_close'}, inplace = True)
+            
             
             # save if file is does not exists
             if save:
@@ -478,8 +498,8 @@ class Stock(FinancialSeries):
         if ret:
             return data
 
-    def fill(self, save = 0):
-        self.download(save = save)
+    def fill(self, save = 0, selenium = False):
+        self.download(save = save, selenium = selenium)
         self.calc_returns()
 
 
