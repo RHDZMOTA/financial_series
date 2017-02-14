@@ -455,7 +455,7 @@ class Stock(FinancialSeries):
                 from selenium import webdriver
                 import platform
                 operative_system = platform.system().lower()
-                driv_r = 'drivers/{}/chromedriver'.format(operative_system) if operative_system != 'windows' else 'drivers/windows/chromedriver.exe'
+                driv_r = 'financial_series/drivers/{}/chromedriver'.format(operative_system) if operative_system != 'windows' else 'financial_series/drivers/windows/chromedriver.exe'
                 driver = webdriver.Chrome(driv_r)
                 driver.get('https://finance.yahoo.com/quote/{}/history?p={}'.format(yho,yho))
                 table = driver.find_elements_by_xpath('//table[@data-test="historical-prices"]')
