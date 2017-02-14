@@ -452,6 +452,8 @@ class Stock(FinancialSeries):
         
             # read data into memory
             if selenium:
+                print('Warning: Selenium web-scrapping does not respect time limits (these are arbitrarly defined by whatever time interval is available default at the website.)')
+                print('Warning: Selenium download is still experimenta. The results are time-inverted, text-chains and the index is not the date (therefore functions such as calc_returns are not availabe).')
                 from selenium import webdriver
                 import platform
                 operative_system = platform.system().lower()
